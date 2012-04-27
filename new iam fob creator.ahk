@@ -13,9 +13,9 @@ iniread, fobletterlocation, wellnet.ini, FOB, fobletterlocation, %A_Space%
 
 Gui, Add, Text, x26 y11 w60 h20 , Application:
 Gui, Add, GroupBox, x16 y37 w570 h130 , User information
-Gui, Add, Text, x26 y61 w60 h20 , First name:
-Gui, Add, Text, x236 y61 w70 h20 , Middle:
-Gui, Add, Text, x416 y61 w60 h20 , Last:
+Gui, Add, Text, x26 y61 w60 h20 vFirstNameText, First name:
+Gui, Add, Text, x236 y61 w70 h20 vMiddleNameText, Middle:
+Gui, Add, Text, x416 y61 w60 h20 vLastNameText, Last:
 Gui, Add, Text, x26 y81 w60 h20 vPositionText, Position:
 Gui, Add, Text, x236 y81 w60 h20 vPhoneText, Phone:
 Gui, Add, Text, x416 y81 w60 h20 vFaxText, Fax:
@@ -28,14 +28,14 @@ Gui, Add, Text, x406 y121 w70 h20 vEmailText, E-mail:
 Gui, Add, Text, x26 y141 w70 h20 vSecretWordText, Secret word:
 Gui, Add, Text, x306 y141 w70 h20 vPromptText, Prompt:
 Gui, Add, GroupBox, x16 y172 w370 h70 , RSA Information
-Gui, Add, Text, x26 y196 w70 h20 Lowercase Limit20, User ID:
-Gui, Add, Text, x206 y196 w70 h20 , Serial Number:
-Gui, Add, Text, x26 y216 w70 h20 , Token Type:
-Gui, Add, Text, x206 y216 w70 h20 , Source:
+Gui, Add, Text, x26 y196 w70 h20 Lowercase Limit20 vUserIDText, User ID:
+Gui, Add, Text, x206 y196 w70 h20 vSerialNoText, Serial Number:
+Gui, Add, Text, x26 y216 w70 h20 vTokenTypeText, Token Type:
+Gui, Add, Text, x206 y216 w70 h20 vFobSourceText, Source:
 Gui, Add, GroupBox, x391 y172 w195 h70 , Automation Settings
 Gui, Add, GroupBox, x16 y247 w570 h70 , Request Information
-Gui, Add, Text, x26 y271 w80 h20 , Completed by:
-Gui, Add, Text, x236 y271 w70 h20 , Request #:
+Gui, Add, Text, x26 y271 w80 h20 vAgentNameText, Completed by:
+Gui, Add, Text, x236 y271 w70 h20 vRequestNoText, Request #:
 Gui, Add, DropDownList, x96 y7 w180 gSetAppNums vAppNum AltSubmit, %applist%
 Gui, Add, Radio, x286 y11 w60 h20 vActionType gEnableRSAOption Checked, Create
 ;Gui, Add, Radio, x356 y11 w60 h20 gDisableRSAOption, Amend
@@ -79,7 +79,7 @@ Return
 ;======== Gui subroutines ========
 UserIdUpdate:
 	gui, submit, nohide
-	guicontrol,,userid, % SubStr(prefname ? prefname . lastname : firstname . lastname,1,20)
+	guicontrol,,userid, % AppName == "CGI" ? SubStr(prefname ? prefname . "." . lastname : firstname . "." . lastname,1,20) : SubStr(prefname ? prefname . lastname : firstname . lastname,1,20)
 return
 
 SetAppNums:
@@ -114,7 +114,15 @@ SetAppNums:
 		GuiControl,,DoLetter,1
 	}
 	else if appname = CGI
-		HideFields("city","orgname","prov","postal","address")
+	{
+		HideFields("city","orgname","prov","postal","address","position","phone","fax")
+		GuiControl,,city,Edmonton
+		GuiControl,,orgname,CGI
+		GuiControl,,prov,AB
+		GuiControl,,postal,T5J 3N6
+		GuiControl,,address,10303 - Jasper Ave, Suite 800
+	}
+
 
 
 
@@ -182,15 +190,6 @@ return
 ;=================================
 
 DoThings:
-if appname = CGI
-{
-	OrgName = CGI
-	Address = 10303 - Jasper Ave, Suite 800
-	City = Edmonton
-	Prov = AB
-	Postal = T5J 3N6
-}
-
 if appname == "Netcare" and doletter and not fobletterlocation ;This should not happen unless the user deletes the fobletterlocation key from the .ini
 {
 	FileSelectFile,fobletterlocation,3,%A_ScriptDir%\ANP form letter - keyfob.dot,Please select your ANP fob letter,*.dot
